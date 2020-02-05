@@ -7,12 +7,13 @@ const ipcMain = require('electron').ipcMain
 // be closed automatically when the JavaScript object is garbage collected.
 let win
 let authWindow
+let articleWindow
 
 function createWindow () {
     // Create the browser window.
     win = new BrowserWindow({
-        width: 1024,
-        height: 800,
+        width: 720,
+        height: 960,
         webPreferences: {
             nodeIntegration: false,
             preload: path.resolve(`${__dirname}/public/renderer.js`),
@@ -59,6 +60,21 @@ function openAuthWindow(request_token, redirect_uri) {
 	})
 }
 
+function openArticleWindow(resolved_url) {
+    articleWindow = new BrowserWindow({
+		width: 1280,
+		height: 800,
+    });
+    
+    articleWindow.center()
+
+    articleWindow.loadURL(resolved_url)
+
+	articleWindow.on('closed', function () {
+		articleWindow = null
+	})
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -85,4 +101,8 @@ app.on('activate', () => {
 // code. You can also put them in separate files and require them here.
 ipcMain.on('open-auth-url', (event, request_token, redirect_uri) => {
     openAuthWindow(request_token, redirect_uri)
+})
+
+ipcMain.on('open-article', (event, resolved_url) => {
+    openArticleWindow(resolved_url)
 })
