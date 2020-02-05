@@ -28,19 +28,15 @@ class App extends React.Component {
         const needAuthentication = store.get('needAuthentication', true);
 
         if(needAuthentication) {
-            const key = getConsumerKey()
-            const oauth = getOauthUrl()
-            const redirect = getRedirectUri()
-
             Axios({
                 method: 'post',
-                url: oauth,
+                url: getOauthUrl(),
                 headers: {
                     'content-type': 'application/json',
                 },
                 params: {
-                    'consumer_key': key,
-                    'redirect_uri': redirect
+                    'consumer_key': getConsumerKey(),
+                    'redirect_uri': getRedirectUri()
                 }
             }).then((response) => {
                 let code = response.data
@@ -49,22 +45,18 @@ class App extends React.Component {
 
                 store.set('needAuthentication', false)
 
-                ipcRenderer.send('open-auth-url', code.substring(5), redirect)
+                ipcRenderer.send('open-auth-url', code.substring(5), getRedirectUri())
             })
         } else {
-            const key = getConsumerKey()
-            const token = store.get('request_token')
-            const authorizeUrl = getAuthorizeUrl();
-
             Axios({
                 method: 'post',
-                url: authorizeUrl,
+                url: getAuthorizeUrl(),
                 headers: {
                     'content-type': 'application/json',
                 },
                 params: {
-                    'consumer_key': key,
-                    'code': token
+                    'consumer_key': getConsumerKey(),
+                    'code': store.get('request_token')
                 }
             }).then((response) => {
                 let code = response.data
@@ -83,19 +75,15 @@ class App extends React.Component {
     }
 
     getArticles() {
-        const key = getConsumerKey()
-        const token = store.get('access_token')
-        const authorizeUrl = getArticlesUrl();
-
         Axios({
             method: 'post',
-            url: authorizeUrl,
+            url: getArticlesUrl(),
             headers: {
                 'content-type': 'application/json',
             },
             params: {
-                'consumer_key': key,
-                'access_token': token
+                'consumer_key': getConsumerKey(),
+                'access_token': store.get('access_token')
             }
         }).then((response) => {
             this.setState({
